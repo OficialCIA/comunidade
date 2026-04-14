@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function AuthPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +19,8 @@ export default function AuthPage() {
     setError(null);
     setInfo(null);
     setLoading(true);
+
+    const supabase = createClient();
 
     if (mode === "signup") {
       // Check username availability

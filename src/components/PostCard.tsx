@@ -18,13 +18,13 @@ export default function PostCard({
   currentUserId,
   onDeleted,
 }: PostCardProps) {
-  const supabase = createClient();
   const [likes, setLikes] = useState(post.likes_count ?? 0);
   const [liked, setLiked] = useState(post.user_has_liked ?? false);
   const [showComments, setShowComments] = useState(false);
 
   const handleLike = async () => {
     if (!currentUserId) return;
+    const supabase = createClient();
     if (liked) {
       await supabase
         .from("likes")
@@ -43,6 +43,7 @@ export default function PostCard({
 
   const handleDelete = async () => {
     if (!confirm("Deletar este post?")) return;
+    const supabase = createClient();
     await supabase.from("posts").delete().eq("id", post.id);
     onDeleted?.(post.id);
   };

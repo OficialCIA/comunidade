@@ -8,7 +8,6 @@ import type { Profile } from "@/lib/types";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
@@ -20,6 +19,7 @@ export default function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const supabase = createClient();
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.push("/auth");
@@ -37,7 +37,7 @@ export default function SettingsPage() {
         setBio(p.bio ?? "");
       }
     });
-  }, [router, supabase]);
+  }, [router]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -59,6 +59,7 @@ export default function SettingsPage() {
 
     if (!profile) return;
 
+    const supabase = createClient();
     const { data: sessionData } = await supabase.auth.getUser();
     const userId = sessionData.user?.id;
     if (!userId) return;
@@ -160,7 +161,7 @@ export default function SettingsPage() {
               alt="avatar"
               width={72}
               height={72}
-              className="rounded-full object-cover w-18 h-18 flex-shrink-0"
+              className="rounded-full object-cover w-[72px] h-[72px] flex-shrink-0"
             />
           ) : (
             <div className="w-[72px] h-[72px] rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-2xl font-bold flex-shrink-0">

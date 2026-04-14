@@ -10,30 +10,33 @@ interface CommentSectionProps {
   currentUserId?: string;
 }
 
+async function fetchComments(postId: string): Promise<Comment[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("comments")
+    .select("*, profiles(username, avatar_url)")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true });
+  return (data as unknown as Comment[]) ?? [];
+}
+
 export default function CommentSection({
   postId,
   currentUserId,
 }: CommentSectionProps) {
-  const supabase = createClient();
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase
-      .from("comments")
-      .select("*, profiles(username, avatar_url)")
-      .eq("post_id", postId)
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        if (data) setComments(data as unknown as Comment[]);
-      });
-  }, [postId, supabase]);
+    fetchComments(postId).then(setComments);
+  }, [postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim() || !currentUserId) return;
     setLoading(true);
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("comments")
       .insert({ post_id: postId, user_id: currentUserId, text })

@@ -5,8 +5,40 @@ import { createClient } from "@/lib/supabase/client";
 import PostCard from "@/components/PostCard";
 import type { Post } from "@/lib/types";
 
-export default function FeedPage() {
+async function fetchPosts(): Promise<Post[]> {
   const supabase = createClient();
+  const { data } = await supabase
+    .from("posts")
+    .select(
+      `*, profiles(username, avatar_url),
+       likes_count:likes(count)`
+    )
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (!data) return [];
+
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+
+  let likedPostIds = new Set<string>();
+  if (userId) {
+    const { data: likedRows } = await supabase
+      .from("likes")
+      .select("post_id")
+      .eq("user_id", userId);
+    if (likedRows) likedPostIds = new Set(likedRows.map((r) => r.post_id));
+  }
+
+  return data.map((p) => ({
+    ...p,
+    likes_count: Array.isArray(p.likes_count)
+      ? (p.likes_count[0] as { count: number })?.count ?? 0
+      : 0,
+    user_has_liked: likedPostIds.has(p.id),
+  }));
+}
+
+export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [content, setContent] = useState("");
@@ -16,48 +48,17 @@ export default function FeedPage() {
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const refreshPosts = () => {
+    fetchPosts().then(setPosts);
+  };
+
   useEffect(() => {
+    const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       setCurrentUserId(data.user?.id);
     });
-    loadPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchPosts().then(setPosts);
   }, []);
-
-  const loadPosts = async () => {
-    const { data } = await supabase
-      .from("posts")
-      .select(
-        `*, profiles(username, avatar_url),
-         likes_count:likes(count)`
-      )
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (!data) return;
-
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-
-    // Determine which posts user has liked
-    let likedPostIds = new Set<string>();
-    if (userId) {
-      const { data: likedRows } = await supabase
-        .from("likes")
-        .select("post_id")
-        .eq("user_id", userId);
-      if (likedRows) likedPostIds = new Set(likedRows.map((r) => r.post_id));
-    }
-
-    const formatted: Post[] = data.map((p) => ({
-      ...p,
-      likes_count: Array.isArray(p.likes_count)
-        ? (p.likes_count[0] as { count: number })?.count ?? 0
-        : 0,
-      user_has_liked: likedPostIds.has(p.id),
-    }));
-
-    setPosts(formatted);
-  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -77,6 +78,7 @@ export default function FeedPage() {
     setLoading(true);
     setError(null);
 
+    const supabase = createClient();
     let imageUrl: string | null = null;
 
     if (image) {
@@ -111,7 +113,7 @@ export default function FeedPage() {
       setImage(null);
       setImagePreview(null);
       if (fileRef.current) fileRef.current.value = "";
-      await loadPosts();
+      refreshPosts();
     }
 
     setLoading(false);
