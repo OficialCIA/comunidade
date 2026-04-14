@@ -160,7 +160,7 @@ export default function SettingsPage() {
               alt="avatar"
               width={72}
               height={72}
-              className="rounded-full object-cover w-18 h-18 flex-shrink-0"
+              className="rounded-full object-cover w-[72px] h-[72px] flex-shrink-0"
             />
           ) : (
             <div className="w-[72px] h-[72px] rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-2xl font-bold flex-shrink-0">
