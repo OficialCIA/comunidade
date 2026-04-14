@@ -1,6 +1,6 @@
-# CIA Comunidade
+# TESTERERSRSRS Comunidade
 
-Rede social da CIA — feed de posts, perfis, comentários, likes e follows. Construída com **Next.js 15 (App Router)**, **Supabase** e **Tailwind CSS**, hospedada gratuitamente na **Vercel**.
+Rede social TESTERSSRSR — feed de posts, perfis, comentários, likes e follows. Construída com **Next.js 15 (App Router)**, **Supabase** e **Tailwind CSS**, hospedada gratuitamente na **Vercel**.
 
 ---
 
