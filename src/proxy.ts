@@ -1,13 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 
 export default async function proxy(request: NextRequest) {
-  try {
-    return await updateSession(request);
-  } catch (error) {
-    console.error("Proxy error:", error);
-    return NextResponse.next();
-  }
+  // Temporarily bypass Supabase to diagnose issue
+  return NextResponse.next();
 }
 
 export const config = {
