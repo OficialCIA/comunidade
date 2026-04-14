@@ -1,13 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 
 export default async function proxy(request: NextRequest) {
-  try {
-    return await updateSession(request);
-  } catch (error) {
-    console.error("Proxy error:", error);
-    return NextResponse.next();
-  }
+  // TODO: Re-add Supabase auth (updateSession) once the 404 root cause is resolved.
+  // Temporarily bypassing Supabase to confirm routing/infrastructure works independently.
+  return NextResponse.next();
 }
 
 export const config = {
